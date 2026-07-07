@@ -150,39 +150,38 @@ a:hover { text-decoration: underline; }
 /* ---------- Hero ---------- */
 
 .hero {
-  background:
-    radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, .35), transparent 55%),
-    radial-gradient(ellipse at 80% 80%, rgba(249, 115, 22, .25), transparent 50%),
-    linear-gradient(135deg, var(--navy) 0%, var(--blue-900) 50%, var(--blue-700) 100%);
+  background: var(--navy) url('/img/hero-players.jpg') center/cover no-repeat;
   color: var(--white);
-  padding: 80px 20px 88px;
+  padding: 96px 20px 104px;
   text-align: center;
   position: relative;
   overflow: hidden;
+  min-height: 420px;
 }
-/* Subtle pentagon / football texture */
+/* Dark overlay for text readability */
 .hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><g fill='none' stroke='white' stroke-width='.5' stroke-opacity='.14'><polygon points='30,5 47,17 40,37 20,37 13,17'/></g></svg>");
-  background-size: 90px 90px;
-  opacity: .5;
+  background:
+    radial-gradient(ellipse at center, rgba(11, 27, 63, .55) 0%, rgba(11, 27, 63, .82) 90%),
+    linear-gradient(180deg, rgba(11, 27, 63, .35) 0%, rgba(11, 27, 63, .25) 40%, rgba(11, 27, 63, .8) 100%);
   pointer-events: none;
 }
-/* Big soft circle bottom-right, like a ball silhouette */
+/* Orange glow accent at bottom-right */
 .hero::after {
   content: "";
   position: absolute;
-  right: -120px;
-  bottom: -120px;
-  width: 340px;
-  height: 340px;
-  background: radial-gradient(circle at 30% 30%, rgba(249, 115, 22, .4), transparent 60%);
+  right: -100px;
+  bottom: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle at 30% 30%, rgba(249, 115, 22, .3), transparent 60%);
   border-radius: 50%;
   pointer-events: none;
+  z-index: 1;
 }
-.hero-inner { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; }
+.hero-inner { position: relative; z-index: 2; max-width: 780px; margin: 0 auto; }
 .hero-eyebrow {
   display: inline-block;
   background: rgba(255, 255, 255, .1);
@@ -203,16 +202,19 @@ a:hover { text-decoration: underline; }
   letter-spacing: -0.03em;
   font-weight: 800;
   line-height: 1.05;
+  text-shadow: 0 2px 24px rgba(11, 27, 63, .7);
 }
 .hero h1 .accent {
   color: var(--orange-400);
   font-style: italic;
+  text-shadow: 0 2px 24px rgba(11, 27, 63, .7);
 }
 .hero p {
   font-size: clamp(15px, 2vw, 18px);
-  color: rgba(255,255,255,.85);
+  color: rgba(255,255,255,.92);
   margin: 0 auto 28px;
   max-width: 560px;
+  text-shadow: 0 1px 12px rgba(11, 27, 63, .6);
 }
 .hero-badges {
   display: flex;
