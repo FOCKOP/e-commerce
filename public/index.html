@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#059669">
+  <meta name="description" content="Onze — maillots de football authentiques et rétro. Livraison rapide.">
+  <title>Onze · Maillots de football</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23059669'/%3E%3Ctext x='50' y='68' font-family='system-ui,sans-serif' font-size='60' font-weight='800' fill='white' text-anchor='middle'%3E11%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <div class="brand-logo">11</div>
+        <div class="brand-text">
+          <div class="brand-name" data-shop-name>Onze</div>
+          <div class="brand-tag" data-shop-tagline>Le vestiaire des passionnés</div>
+        </div>
+      </a>
+      <nav class="nav">
+        <a href="#produits">Boutique</a>
+        <a href="/admin">Admin</a>
+        <button class="cart-btn" id="cartBtn" aria-label="Voir le panier">
+          Panier
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Le maillot qui te ressemble.</h1>
+      <p>Sélection de maillots officiels, rétro et éditions spéciales. Choisis, commande, porte tes couleurs.</p>
+      <div class="hero-badges">
+        <span class="badge">Livraison sous 48h</span>
+        <span class="badge">Pièces authentiques</span>
+        <span class="badge">Paiement à la commande</span>
+      </div>
+    </div>
+  </section>
+
+  <main class="container" id="produits">
+    <div class="section-head">
+      <h2>Nos maillots</h2>
+      <div class="search-box">
+        <input type="search" id="search" placeholder="Rechercher un club, un joueur...">
+      </div>
+    </div>
+    <div id="productsGrid" class="grid"></div>
+    <div id="emptyState" class="empty" style="display:none">
+      <h3>Aucun maillot pour l'instant</h3>
+      <p>La boutique se remplit — repasse dans quelques instants.</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p><strong data-shop-name>Onze</strong> — <span data-shop-tagline>Le vestiaire des passionnés</span></p>
+    <p>© <span id="year"></span> · <a href="/admin">Espace vendeur</a></p>
+  </footer>
+
+  <!-- Product detail modal -->
+  <div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="detailTitle">Maillot</h3>
+        <button class="icon-btn" data-close aria-label="Fermer">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail" id="detailBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart modal -->
+  <div class="modal-overlay" id="cartModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Votre panier</h3>
+        <button class="icon-btn" data-close aria-label="Fermer">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="cartBody"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-secondary" data-close>Continuer</button>
+        <button class="btn btn-primary" id="goCheckout" disabled>Commander</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout modal -->
+  <div class="modal-overlay" id="checkoutModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Finaliser la commande</h3>
+        <button class="icon-btn" data-close aria-label="Fermer">×</button>
+      </div>
+      <form id="checkoutForm">
+        <div class="modal-body">
+          <div class="field">
+            <label for="cName">Votre nom</label>
+            <input id="cName" name="name" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="cContact">Email ou téléphone</label>
+            <input id="cContact" name="contact" required autocomplete="email">
+            <div class="field-hint">Pour qu'on vous contacte rapidement.</div>
+          </div>
+          <div class="field">
+            <label for="cAddress">Adresse de livraison</label>
+            <textarea id="cAddress" name="address" rows="2" required autocomplete="street-address"></textarea>
+          </div>
+          <div class="field">
+            <label for="cNote">Message (optionnel)</label>
+            <textarea id="cNote" name="note" rows="2" placeholder="Instructions particulières..."></textarea>
+          </div>
+          <div class="cart-total">
+            <span>Total</span>
+            <span id="checkoutTotal">0 €</span>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-secondary" data-close>Retour</button>
+          <button type="submit" class="btn btn-primary">Valider la commande</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirmation modal -->
+  <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Commande envoyée !</h3>
+        <button class="icon-btn" data-close aria-label="Fermer">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Merci pour votre confiance. Nous avons bien reçu votre commande <strong id="confirmId"></strong> et vous recontactons rapidement pour la confirmation et le paiement.</p>
+        <div id="contactOptions"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-primary btn-block" data-close>Retour à la boutique</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/js/shop.js"></script>
+</body>
+</html>

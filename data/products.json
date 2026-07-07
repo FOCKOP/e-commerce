@@ -1,0 +1,46 @@
+[
+  {
+    "id": "demo001",
+    "name": "Maillot domicile 2024",
+    "team": "PSG",
+    "price": 89.9,
+    "description": "Maillot officiel domicile, coupe fitted, floquage au choix.",
+    "image": "",
+    "sizes": ["S", "M", "L", "XL"],
+    "stock": 8,
+    "createdAt": 1719840000000
+  },
+  {
+    "id": "demo002",
+    "name": "Maillot rétro 1998",
+    "team": "France",
+    "price": 74.0,
+    "description": "Réédition du maillot bleu victorieux de 1998. Édition limitée.",
+    "image": "",
+    "sizes": ["M", "L", "XL"],
+    "stock": 3,
+    "createdAt": 1719843600000
+  },
+  {
+    "id": "demo003",
+    "name": "Maillot extérieur 2024",
+    "team": "Real Madrid",
+    "price": 84.9,
+    "description": "Maillot extérieur officiel, tissu respirant, tailles adulte.",
+    "image": "",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "stock": 12,
+    "createdAt": 1719847200000
+  },
+  {
+    "id": "demo004",
+    "name": "Maillot third gardien",
+    "team": "OM",
+    "price": 79.0,
+    "description": "Édition spéciale gardien, coloris fluo, tailles limitées.",
+    "image": "",
+    "sizes": ["M", "L"],
+    "stock": 5,
+    "createdAt": 1719850800000
+  }
+]

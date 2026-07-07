@@ -1,0 +1,11 @@
+node_modules/
+npm-debug.log*
+.env
+.DS_Store
+
+# Uploaded product images (bind-mount or object storage in production)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Local order / settings state — production should use a real DB
+data/orders.json

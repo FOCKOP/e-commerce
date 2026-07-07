@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Admin · Onze</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-family='system-ui,sans-serif' font-size='60' font-weight='800' fill='%2310b981' text-anchor='middle'%3E11%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <!-- Login view -->
+  <section id="loginView">
+    <div class="login-wrap">
+      <div style="text-align:center;margin-bottom:20px">
+        <div class="brand-logo" style="margin:0 auto 10px">11</div>
+      </div>
+      <h2>Espace vendeur</h2>
+      <p>Connectez-vous pour gérer votre boutique.</p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" name="password" required autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+        <p id="loginError" style="color:var(--danger);font-size:13px;margin-top:12px;display:none"></p>
+      </form>
+      <p style="margin-top:20px;text-align:center">
+        <a href="/">← Retour à la boutique</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Admin view -->
+  <section id="adminView" style="display:none">
+    <header class="admin-header">
+      <a href="/" class="brand" style="color:white">
+        <div class="brand-logo">11</div>
+        <div class="brand-text">
+          <div class="brand-name">Onze — Admin</div>
+          <div class="brand-tag">Gestion de la boutique</div>
+        </div>
+      </a>
+      <div style="display:flex;gap:8px">
+        <a href="/">Voir la boutique</a>
+        <button id="logoutBtn">Déconnexion</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="admin-tabs">
+        <button class="tab active" data-tab="products">Maillots</button>
+        <button class="tab" data-tab="orders">Commandes <span id="ordersBadge" style="background:var(--orange-500);color:white;padding:0 8px;border-radius:999px;font-size:11px;margin-left:4px;display:none"></span></button>
+        <button class="tab" data-tab="settings">Paramètres</button>
+      </div>
+
+      <!-- Products tab -->
+      <div class="tab-panel active" data-panel="products">
+        <div class="section-head">
+          <h2>Vos maillots</h2>
+          <button class="btn btn-primary" id="newProductBtn">+ Ajouter un maillot</button>
+        </div>
+        <div id="adminGrid" class="admin-grid"></div>
+        <div id="adminEmpty" class="empty" style="display:none">
+          <h3>Aucun maillot</h3>
+          <p>Cliquez sur "Ajouter un maillot" pour commencer.</p>
+        </div>
+      </div>
+
+      <!-- Orders tab -->
+      <div class="tab-panel" data-panel="orders">
+        <div class="section-head">
+          <h2>Commandes reçues</h2>
+        </div>
+        <div id="ordersList"></div>
+        <div id="ordersEmpty" class="empty" style="display:none">
+          <h3>Pas encore de commande</h3>
+          <p>Les commandes de vos clients apparaîtront ici.</p>
+        </div>
+      </div>
+
+      <!-- Settings tab -->
+      <div class="tab-panel" data-panel="settings">
+        <div class="section-head">
+          <h2>Paramètres de la boutique</h2>
+        </div>
+        <form id="settingsForm" style="max-width:560px">
+          <div class="field">
+            <label for="sShopName">Nom de la boutique</label>
+            <input id="sShopName" name="shopName" required>
+          </div>
+          <div class="field">
+            <label for="sTagline">Slogan</label>
+            <input id="sTagline" name="tagline">
+          </div>
+          <div class="field">
+            <label for="sWhatsapp">WhatsApp (avec indicatif, ex : 33612345678)</label>
+            <input id="sWhatsapp" name="contactWhatsapp" placeholder="Ex : 33612345678">
+            <div class="field-hint">Utilisé pour le bouton de confirmation de commande.</div>
+          </div>
+          <div class="field">
+            <label for="sEmail">Email de contact</label>
+            <input id="sEmail" name="contactEmail" type="email">
+          </div>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </form>
+      </div>
+    </main>
+  </section>
+
+  <!-- Product edit modal -->
+  <div class="modal-overlay" id="productModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="productModalTitle">Ajouter un maillot</h3>
+        <button class="icon-btn" data-close aria-label="Fermer">×</button>
+      </div>
+      <form id="productForm">
+        <div class="modal-body">
+          <input type="hidden" name="id">
+          <div class="field">
+            <label>Photo du maillot</label>
+            <div class="upload-area" id="uploadArea">
+              <img id="uploadPreview" class="upload-preview" style="display:none">
+              <div id="uploadPrompt">
+                <div style="font-size:36px;margin-bottom:6px">📷</div>
+                <div style="font-weight:600">Cliquez ou déposez une image</div>
+                <div class="field-hint">PNG, JPG, WEBP — max 5 Mo</div>
+              </div>
+            </div>
+            <input type="file" id="uploadInput" accept="image/*" style="display:none">
+            <input type="hidden" name="image">
+          </div>
+          <div class="field">
+            <label for="pName">Nom du maillot</label>
+            <input id="pName" name="name" required placeholder="Ex : Maillot domicile 2024">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="pTeam">Club / équipe</label>
+              <input id="pTeam" name="team" placeholder="Ex : PSG">
+            </div>
+            <div class="field">
+              <label for="pPrice">Prix (€)</label>
+              <input id="pPrice" name="price" type="number" step="0.01" min="0" required>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="pStock">Stock disponible</label>
+              <input id="pStock" name="stock" type="number" min="0" value="10" required>
+            </div>
+            <div class="field">
+              <label for="pSizes">Tailles disponibles</label>
+              <input id="pSizes" name="sizes" placeholder="S, M, L, XL" value="S, M, L, XL">
+              <div class="field-hint">Séparées par des virgules</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pDesc">Description</label>
+            <textarea id="pDesc" name="description" rows="3" placeholder="Ex : Maillot officiel domicile, floqué au choix."></textarea>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-secondary" data-close>Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
