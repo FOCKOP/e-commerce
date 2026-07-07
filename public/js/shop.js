@@ -2,18 +2,18 @@
   const state = {
     products: [],
     settings: {},
-    cart: JSON.parse(localStorage.getItem('onze.cart') || '[]'),
-    selectedProduct: null,
-    selectedSize: null
+    cart: JSON.parse(localStorage.getItem('onze.cart') || '[]')
   };
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
   const eur = n => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
-  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({
+  const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
+  const normalize = s => String(s ?? '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
   function saveCart() {
     localStorage.setItem('onze.cart', JSON.stringify(state.cart));
@@ -60,20 +60,27 @@
     }
   }
 
-  function productImage(p, cls = '') {
-    if (p.image) return `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" class="${cls}">`;
+  function firstImage(p) {
+    return (p.images && p.images.length) ? p.images[0] : '';
+  }
+
+  function productImage(p) {
+    const img = firstImage(p);
+    if (img) return `<img src="${escapeHtml(img)}" alt="${escapeHtml(p.name)}" loading="lazy">`;
     return `<div class="card-img-placeholder">👕</div>`;
   }
 
   function renderGrid() {
-    const q = $('#search').value.trim().toLowerCase();
-    const list = state.products.filter(p => {
-      if (!q) return true;
-      return (p.name + ' ' + (p.team || '') + ' ' + (p.description || '')).toLowerCase().includes(q);
-    });
+    const q = normalize($('#search').value.trim());
+    const list = q
+      ? state.products.filter(p =>
+          normalize(`${p.name} ${p.team || ''} ${p.description || ''}`).includes(q))
+      : state.products;
+
     const grid = $('#productsGrid');
     grid.innerHTML = list.map(p => {
       const outOfStock = (p.stock || 0) <= 0;
+      const imgCount = (p.images || []).length;
       return `
         <article class="card" data-id="${p.id}">
           <div class="card-img-wrap">
@@ -81,6 +88,10 @@
             ${outOfStock
               ? '<span class="card-badge-stock out">Épuisé</span>'
               : (p.stock <= 3 ? `<span class="card-badge-stock">Plus que ${p.stock}</span>` : '')}
+            ${imgCount > 1 ? `<span class="card-badge-multi">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="14" height="14" rx="2"/><rect x="7" y="7" width="14" height="14" rx="2"/></svg>
+              ${imgCount}
+            </span>` : ''}
           </div>
           <div class="card-body">
             ${p.team ? `<div class="card-team">${escapeHtml(p.team)}</div>` : ''}
@@ -88,7 +99,7 @@
             ${p.description ? `<p class="card-desc">${escapeHtml(p.description)}</p>` : ''}
             <div class="card-foot">
               <div class="card-price">${eur(p.price)}</div>
-              <button class="btn-add" data-open="${p.id}" ${outOfStock ? 'disabled' : ''}>
+              <button class="btn-add" ${outOfStock ? 'disabled' : ''}>
                 ${outOfStock ? 'Épuisé' : 'Voir'}
               </button>
             </div>
@@ -96,77 +107,16 @@
         </article>
       `;
     }).join('');
+
     $('#emptyState').style.display = state.products.length === 0 ? 'block' : 'none';
-    grid.style.display = state.products.length === 0 ? 'none' : '';
+    $('#noResults').style.display = (state.products.length > 0 && list.length === 0) ? 'block' : 'none';
+    grid.style.display = list.length === 0 ? 'none' : '';
 
-    grid.querySelectorAll('[data-open]').forEach(btn =>
-      btn.addEventListener('click', () => openDetail(btn.dataset.open))
-    );
-    grid.querySelectorAll('.card-img-wrap, .card-name').forEach(el => {
-      el.addEventListener('click', () => {
-        const id = el.closest('.card')?.dataset.id;
-        if (id) openDetail(id);
-      });
-      el.style.cursor = 'pointer';
-    });
-  }
-
-  function openDetail(id) {
-    const p = state.products.find(x => x.id === id);
-    if (!p) return;
-    state.selectedProduct = p;
-    state.selectedSize = (p.sizes && p.sizes[0]) || null;
-    $('#detailTitle').textContent = p.name;
-    $('#detailBody').innerHTML = `
-      <div class="detail-img">${productImage(p)}</div>
-      <div>
-        ${p.team ? `<div class="detail-team">${escapeHtml(p.team)}</div>` : ''}
-        <h2>${escapeHtml(p.name)}</h2>
-        <div class="detail-price">${eur(p.price)}</div>
-        ${p.description ? `<p class="detail-desc">${escapeHtml(p.description)}</p>` : ''}
-        ${p.sizes && p.sizes.length ? `
-          <div class="field">
-            <label>Taille</label>
-            <div class="detail-sizes" id="sizeChips">
-              ${p.sizes.map((s, i) =>
-                `<button type="button" class="size-chip ${i === 0 ? 'active' : ''}" data-size="${escapeHtml(s)}">${escapeHtml(s)}</button>`
-              ).join('')}
-            </div>
-          </div>` : ''}
-        <button class="btn btn-primary btn-block" id="addToCartBtn"
-          ${(p.stock || 0) <= 0 ? 'disabled' : ''}>
-          ${(p.stock || 0) <= 0 ? 'Épuisé' : 'Ajouter au panier'}
-        </button>
-      </div>
-    `;
-    $$('#sizeChips .size-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        $$('#sizeChips .size-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        state.selectedSize = chip.dataset.size;
+    grid.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        location.href = '/produit?id=' + encodeURIComponent(card.dataset.id);
       });
     });
-    $('#addToCartBtn').addEventListener('click', addSelectedToCart);
-    openModal('detailModal');
-  }
-
-  function addSelectedToCart() {
-    const p = state.selectedProduct;
-    if (!p) return;
-    const size = state.selectedSize || (p.sizes && p.sizes[0]) || '-';
-    const key = p.id + '::' + size;
-    const existing = state.cart.find(i => i.key === key);
-    if (existing) {
-      existing.qty = Math.min(existing.qty + 1, p.stock || 99);
-    } else {
-      state.cart.push({
-        key, id: p.id, name: p.name, team: p.team, price: p.price,
-        image: p.image, size, qty: 1, maxStock: p.stock || 99
-      });
-    }
-    saveCart();
-    closeModal($('#detailModal'));
-    toast(`« ${p.name} » ajouté au panier`);
   }
 
   function renderCartCount() {
@@ -177,7 +127,10 @@
   function renderCart() {
     const body = $('#cartBody');
     if (state.cart.length === 0) {
-      body.innerHTML = `<div class="empty" style="padding:32px 16px"><h3>Panier vide</h3><p>Ajoute un maillot pour commencer.</p></div>`;
+      body.innerHTML = `<div class="empty" style="padding:36px 16px;border:none">
+        <h3>Panier vide</h3>
+        <p>Choisis un maillot pour commencer.</p>
+      </div>`;
       $('#goCheckout').disabled = true;
       return;
     }
@@ -191,9 +144,9 @@
           <div class="cart-name">${escapeHtml(i.name)}</div>
           <div class="cart-meta">${i.team ? escapeHtml(i.team) + ' · ' : ''}Taille ${escapeHtml(i.size)}</div>
           <div class="qty" style="margin-top:6px">
-            <button data-act="dec">−</button>
+            <button data-act="dec" aria-label="Moins">−</button>
             <span>${i.qty}</span>
-            <button data-act="inc">+</button>
+            <button data-act="inc" aria-label="Plus">+</button>
           </div>
         </div>
         <div class="cart-actions">

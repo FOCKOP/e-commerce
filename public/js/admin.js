@@ -7,6 +7,10 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 
+  const state = {
+    editingImages: [] // urls currently attached to the product being edited
+  };
+
   function toast(msg) {
     const el = $('#toast');
     el.textContent = msg;
@@ -94,22 +98,27 @@
 
   function renderProducts() {
     const grid = $('#adminGrid');
-    grid.innerHTML = products.map(p => `
-      <div class="admin-card" data-id="${p.id}">
-        <div class="admin-thumb">
-          ${p.image ? `<img src="${escapeHtml(p.image)}" alt="">` : '<div class="card-img-placeholder" style="font-size:24px">👕</div>'}
+    grid.innerHTML = products.map(p => {
+      const cover = (p.images && p.images[0]) || '';
+      const imgCount = (p.images || []).length;
+      return `
+        <div class="admin-card" data-id="${p.id}">
+          <div class="admin-thumb">
+            ${cover ? `<img src="${escapeHtml(cover)}" alt="">` : '<div class="card-img-placeholder" style="font-size:24px">👕</div>'}
+            ${imgCount > 1 ? `<span class="count">×${imgCount}</span>` : ''}
+          </div>
+          <div class="admin-info">
+            <h4>${escapeHtml(p.name)}</h4>
+            <div class="price">${eur(p.price)}</div>
+            <div class="meta">${escapeHtml(p.team || '—')} · Stock : ${p.stock ?? 0}</div>
+          </div>
+          <div class="admin-actions">
+            <button class="btn btn-secondary" data-edit="${p.id}">Modifier</button>
+            <button class="btn btn-danger" data-del="${p.id}">Supprimer</button>
+          </div>
         </div>
-        <div class="admin-info">
-          <h4>${escapeHtml(p.name)}</h4>
-          <div class="price">${eur(p.price)}</div>
-          <div class="meta">${escapeHtml(p.team || '—')} · Stock : ${p.stock ?? 0}</div>
-        </div>
-        <div class="admin-actions">
-          <button class="btn btn-secondary" data-edit="${p.id}">Modifier</button>
-          <button class="btn btn-danger" data-del="${p.id}">Supprimer</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
     $('#adminEmpty').style.display = products.length === 0 ? 'block' : 'none';
     grid.style.display = products.length === 0 ? 'none' : '';
     grid.querySelectorAll('[data-edit]').forEach(b =>
@@ -125,10 +134,7 @@
   function openProductModal(id) {
     const form = $('#productForm');
     form.reset();
-    $('#uploadPreview').style.display = 'none';
-    $('#uploadPreview').src = '';
-    $('#uploadPrompt').style.display = '';
-    form.image.value = '';
+    state.editingImages = [];
     if (id) {
       const p = products.find(x => x.id === id);
       if (!p) return;
@@ -140,17 +146,91 @@
       form.stock.value = p.stock ?? 0;
       form.sizes.value = (p.sizes || []).join(', ');
       form.description.value = p.description || '';
-      form.image.value = p.image || '';
-      if (p.image) {
-        $('#uploadPreview').src = p.image;
-        $('#uploadPreview').style.display = 'block';
-        $('#uploadPrompt').style.display = 'none';
-      }
+      state.editingImages = [...(p.images || [])];
     } else {
       $('#productModalTitle').textContent = 'Ajouter un maillot';
       form.id.value = '';
     }
+    renderImagesGrid();
     openModal('productModal');
+  }
+
+  function renderImagesGrid() {
+    const grid = $('#imagesGrid');
+    const tiles = state.editingImages.map((url, i) => `
+      <div class="image-tile" data-i="${i}">
+        <img src="${escapeHtml(url)}" alt="">
+        ${i === 0 ? '<span class="badge-cover">Couverture</span>' : ''}
+        <div class="actions">
+          ${i > 0 ? '<button type="button" data-act="left" title="Déplacer à gauche">←</button>' : ''}
+          ${i < state.editingImages.length - 1 ? '<button type="button" data-act="right" title="Déplacer à droite">→</button>' : ''}
+          <button type="button" data-act="del" class="del" title="Retirer">×</button>
+        </div>
+      </div>
+    `).join('');
+    const canAdd = state.editingImages.length < 8;
+    const addTile = canAdd ? `
+      <div class="upload-area" id="addImageTile">
+        <div>
+          <div style="font-size:28px;line-height:1">+</div>
+          <div style="font-size:12px;margin-top:4px;font-weight:600">
+            ${state.editingImages.length === 0 ? 'Ajouter des photos' : 'Ajouter'}
+          </div>
+        </div>
+      </div>` : '';
+    grid.innerHTML = tiles + addTile;
+
+    grid.querySelectorAll('.image-tile').forEach(tile => {
+      const i = Number(tile.dataset.i);
+      tile.querySelectorAll('[data-act]').forEach(b => {
+        b.addEventListener('click', () => {
+          const act = b.dataset.act;
+          if (act === 'del') state.editingImages.splice(i, 1);
+          if (act === 'left') [state.editingImages[i - 1], state.editingImages[i]] = [state.editingImages[i], state.editingImages[i - 1]];
+          if (act === 'right') [state.editingImages[i + 1], state.editingImages[i]] = [state.editingImages[i], state.editingImages[i + 1]];
+          renderImagesGrid();
+        });
+      });
+    });
+
+    const addTileEl = $('#addImageTile');
+    if (addTileEl) {
+      addTileEl.addEventListener('click', () => $('#uploadInput').click());
+      addTileEl.addEventListener('dragover', e => { e.preventDefault(); addTileEl.style.background = 'var(--blue-100)'; });
+      addTileEl.addEventListener('dragleave', () => { addTileEl.style.background = ''; });
+      addTileEl.addEventListener('drop', e => {
+        e.preventDefault();
+        addTileEl.style.background = '';
+        if (e.dataTransfer.files?.length) handleUpload(Array.from(e.dataTransfer.files));
+      });
+    }
+  }
+
+  $('#uploadInput').addEventListener('change', e => {
+    if (e.target.files?.length) handleUpload(Array.from(e.target.files));
+    e.target.value = '';
+  });
+
+  async function handleUpload(files) {
+    const remaining = 8 - state.editingImages.length;
+    const toUpload = files.slice(0, remaining);
+    if (toUpload.length === 0) { toast('Maximum 8 photos'); return; }
+    const form = new FormData();
+    toUpload.forEach(f => form.append('images', f));
+    toast('Téléchargement...');
+    try {
+      const r = await fetch('/api/upload', { method: 'POST', body: form });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        throw new Error(d.error || 'Échec du téléchargement');
+      }
+      const { urls } = await r.json();
+      state.editingImages.push(...urls);
+      renderImagesGrid();
+      toast(urls.length > 1 ? `${urls.length} photos ajoutées` : 'Photo ajoutée');
+    } catch (err) {
+      toast(err.message);
+    }
   }
 
   async function deleteProduct(id) {
@@ -159,40 +239,6 @@
     if (!r.ok) { toast('Erreur'); return; }
     toast('Maillot supprimé');
     loadProducts();
-  }
-
-  // Image upload
-  $('#uploadArea').addEventListener('click', () => $('#uploadInput').click());
-  $('#uploadArea').addEventListener('dragover', e => { e.preventDefault(); $('#uploadArea').style.background = 'var(--green-100)'; });
-  $('#uploadArea').addEventListener('dragleave', () => { $('#uploadArea').style.background = ''; });
-  $('#uploadArea').addEventListener('drop', e => {
-    e.preventDefault();
-    $('#uploadArea').style.background = '';
-    if (e.dataTransfer.files?.[0]) handleUpload(e.dataTransfer.files[0]);
-  });
-  $('#uploadInput').addEventListener('change', e => {
-    if (e.target.files?.[0]) handleUpload(e.target.files[0]);
-  });
-
-  async function handleUpload(file) {
-    const form = new FormData();
-    form.append('image', file);
-    toast('Téléchargement...');
-    try {
-      const r = await fetch('/api/upload', { method: 'POST', body: form });
-      if (!r.ok) {
-        const d = await r.json().catch(() => ({}));
-        throw new Error(d.error || 'Échec du téléchargement');
-      }
-      const { url } = await r.json();
-      $('#productForm').image.value = url;
-      $('#uploadPreview').src = url;
-      $('#uploadPreview').style.display = 'block';
-      $('#uploadPrompt').style.display = 'none';
-      toast('Image téléchargée');
-    } catch (err) {
-      toast(err.message);
-    }
   }
 
   $('#productForm').addEventListener('submit', async e => {
@@ -207,7 +253,7 @@
       stock: Number(form.stock.value),
       sizes: form.sizes.value.split(',').map(s => s.trim()).filter(Boolean),
       description: form.description.value.trim(),
-      image: form.image.value
+      images: state.editingImages
     };
     const id = form.id.value;
     try {
@@ -234,12 +280,8 @@
     const orders = await r.json();
     const nouvelles = orders.filter(o => o.status === 'nouvelle').length;
     const badge = $('#ordersBadge');
-    if (nouvelles > 0) {
-      badge.textContent = nouvelles;
-      badge.style.display = 'inline-block';
-    } else {
-      badge.style.display = 'none';
-    }
+    if (nouvelles > 0) { badge.textContent = nouvelles; badge.style.display = 'inline-block'; }
+    else badge.style.display = 'none';
     const list = $('#ordersList');
     list.innerHTML = orders.map(o => `
       <div class="order-item" data-id="${o.id}">
@@ -256,7 +298,7 @@
           ${o.items.map(i => `<li>${i.qty}× <strong>${escapeHtml(i.name)}</strong> (${escapeHtml(i.size)}) — ${eur(i.price * i.qty)}</li>`).join('')}
         </ul>
         <div style="margin-bottom:8px"><strong>Total :</strong> ${eur(o.total)}</div>
-        <div style="font-size:13px;margin-bottom:8px">
+        <div style="font-size:13px;margin-bottom:10px">
           <div><strong>Contact :</strong> ${escapeHtml(o.customer.contact)}</div>
           <div><strong>Adresse :</strong> ${escapeHtml(o.customer.address || '—')}</div>
           ${o.note ? `<div><strong>Message :</strong> ${escapeHtml(o.note)}</div>` : ''}

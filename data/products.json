@@ -5,7 +5,11 @@
     "team": "PSG",
     "price": 89.9,
     "description": "Maillot officiel domicile, coupe fitted, floquage au choix.",
-    "image": "",
+    "images": [
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwYjFiM2YiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxZTNhOGEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0idXJsKCNnKSIvPjxwYXRoIGQ9Ik0xNDAgMTIwaDEyMGwzMCA0MC0zMCA0MHY4MEgxNDB2LTgwbC0zMC00MHoiIGZpbGw9IiNmOTczMTYiIG9wYWNpdHk9Ii44Ii8+PHRleHQgeD0iMjAwIiB5PSIzMzAiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIj5QU0cgLSBEb21pY2lsZTwvdGV4dD48L3N2Zz4=",
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzFlM2E4YSIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iODAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y5NzMxNiIgc3Ryb2tlLXdpZHRoPSIxMCIvPjx0ZXh0IHg9IjIwMCIgeT0iMjEwIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSI+MTA8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSIzNjAiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iMjIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWkiPkRvcyBkdSBtYWlsbG90PC90ZXh0Pjwvc3ZnPg==",
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0xNjAgMTgwaDgwdjgwaC04MHoiIGZpbGw9IiMwYjFiM2YiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIyMjAiIHI9IjE1IiBmaWxsPSIjZjk3MzE2Ii8+PHRleHQgeD0iMjAwIiB5PSIzNTAiIGZpbGw9IiMwYjFiM2YiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWkiPkTDqXRhaWwgYmxhc29uPC90ZXh0Pjwvc3ZnPg=="
+    ],
     "sizes": ["S", "M", "L", "XL"],
     "stock": 8,
     "createdAt": 1719840000000
@@ -16,7 +20,9 @@
     "team": "France",
     "price": 74.0,
     "description": "Réédition du maillot bleu victorieux de 1998. Édition limitée.",
-    "image": "",
+    "images": [
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzFkNGVkOCIvPjxwYXRoIGQ9Ik0xNDAgMTIwaDEyMGwzMCA0MC0zMCA0MHY4MEgxNDB2LTgwbC0zMC00MHoiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIuMiIvPjx0ZXh0IHg9IjIwMCIgeT0iMzMwIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjMwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSI+RnJhbmNlIDE5OTg8L3RleHQ+PC9zdmc+"
+    ],
     "sizes": ["M", "L", "XL"],
     "stock": 3,
     "createdAt": 1719843600000
@@ -27,7 +33,9 @@
     "team": "Real Madrid",
     "price": 84.9,
     "description": "Maillot extérieur officiel, tissu respirant, tailles adulte.",
-    "image": "",
+    "images": [
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0xNDAgMTIwaDEyMGwzMCA0MC0zMCA0MHY4MEgxNDB2LTgwbC0zMC00MHoiIGZpbGw9IiMwYjFiM2YiIG9wYWNpdHk9Ii45Ii8+PHRleHQgeD0iMjAwIiB5PSIzMzAiIGZpbGw9IiMwYjFiM2YiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIj5SZWFsIE1hZHJpZDwvdGV4dD48L3N2Zz4="
+    ],
     "sizes": ["S", "M", "L", "XL", "XXL"],
     "stock": 12,
     "createdAt": 1719847200000
@@ -38,7 +46,9 @@
     "team": "OM",
     "price": 79.0,
     "description": "Édition spéciale gardien, coloris fluo, tailles limitées.",
-    "image": "",
+    "images": [
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2VhNTgwYyIvPjxwYXRoIGQ9Ik0xNDAgMTIwaDEyMGwzMCA0MC0zMCA0MHY4MEgxNDB2LTgwbC0zMC00MHoiIGZpbGw9IiMwYjFiM2YiLz48dGV4dCB4PSIyMDAiIHk9IjMzMCIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSIzMCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWkiPk9NIC0gR2FyZGllbjwvdGV4dD48L3N2Zz4="
+    ],
     "sizes": ["M", "L"],
     "stock": 5,
     "createdAt": 1719850800000

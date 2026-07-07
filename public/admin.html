@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b1b3f">
   <title>Admin · Onze</title>
   <link rel="stylesheet" href="/css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-family='system-ui,sans-serif' font-size='60' font-weight='800' fill='%2310b981' text-anchor='middle'%3E11%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b1b3f'/%3E%3Ctext x='50' y='68' font-family='system-ui,sans-serif' font-size='60' font-weight='800' fill='%23f97316' text-anchor='middle'%3E11%3C/text%3E%3C/svg%3E">
 </head>
 <body>
-  <!-- Login view -->
+  <!-- Login -->
   <section id="loginView">
     <div class="login-wrap">
       <div style="text-align:center;margin-bottom:20px">
@@ -31,7 +31,7 @@
     </div>
   </section>
 
-  <!-- Admin view -->
+  <!-- Admin -->
   <section id="adminView" style="display:none">
     <header class="admin-header">
       <a href="/" class="brand" style="color:white">
@@ -41,7 +41,7 @@
           <div class="brand-tag">Gestion de la boutique</div>
         </div>
       </a>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
         <a href="/">Voir la boutique</a>
         <button id="logoutBtn">Déconnexion</button>
       </div>
@@ -54,7 +54,7 @@
         <button class="tab" data-tab="settings">Paramètres</button>
       </div>
 
-      <!-- Products tab -->
+      <!-- Products -->
       <div class="tab-panel active" data-panel="products">
         <div class="section-head">
           <h2>Vos maillots</h2>
@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <!-- Orders tab -->
+      <!-- Orders -->
       <div class="tab-panel" data-panel="orders">
         <div class="section-head">
           <h2>Commandes reçues</h2>
@@ -79,7 +79,7 @@
         </div>
       </div>
 
-      <!-- Settings tab -->
+      <!-- Settings -->
       <div class="tab-panel" data-panel="settings">
         <div class="section-head">
           <h2>Paramètres de la boutique</h2>
@@ -108,7 +108,7 @@
     </main>
   </section>
 
-  <!-- Product edit modal -->
+  <!-- Product modal -->
   <div class="modal-overlay" id="productModal" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-head">
@@ -119,17 +119,13 @@
         <div class="modal-body">
           <input type="hidden" name="id">
           <div class="field">
-            <label>Photo du maillot</label>
-            <div class="upload-area" id="uploadArea">
-              <img id="uploadPreview" class="upload-preview" style="display:none">
-              <div id="uploadPrompt">
-                <div style="font-size:36px;margin-bottom:6px">📷</div>
-                <div style="font-weight:600">Cliquez ou déposez une image</div>
-                <div class="field-hint">PNG, JPG, WEBP — max 5 Mo</div>
-              </div>
+            <label>Photos du maillot</label>
+            <div class="field-hint" style="margin-bottom:8px">
+              Jusqu'à 8 photos. La première est utilisée comme visuel de couverture.
+              Glisse-dépose plusieurs photos d'un coup, ou clique sur la case "+".
             </div>
-            <input type="file" id="uploadInput" accept="image/*" style="display:none">
-            <input type="hidden" name="image">
+            <div class="images-grid" id="imagesGrid"></div>
+            <input type="file" id="uploadInput" accept="image/*" multiple style="display:none">
           </div>
           <div class="field">
             <label for="pName">Nom du maillot</label>
@@ -170,7 +166,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-
   <script src="/js/admin.js"></script>
 </body>
 </html>

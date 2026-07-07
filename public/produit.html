@@ -4,8 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1b3f">
-  <meta name="description" content="Onze — maillots de football authentiques, rétro et éditions spéciales.">
-  <title>Onze · Maillots de football</title>
+  <title>Chargement… · Onze</title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b1b3f'/%3E%3Ctext x='50' y='68' font-family='system-ui,sans-serif' font-size='60' font-weight='800' fill='%23f97316' text-anchor='middle'%3E11%3C/text%3E%3C/svg%3E">
 </head>
@@ -20,7 +19,7 @@
         </div>
       </a>
       <nav class="nav">
-        <a href="#produits">Boutique</a>
+        <a href="/">Boutique</a>
         <a href="/admin">Admin</a>
         <button class="cart-btn" id="cartBtn" aria-label="Voir le panier">
           Panier
@@ -30,44 +29,13 @@
     </div>
   </header>
 
-  <section class="hero">
-    <div class="hero-inner">
-      <span class="hero-eyebrow">Sélection maison</span>
-      <h1>Le maillot qui te <span class="accent">ressemble</span>.</h1>
-      <p>Officiels, rétro, éditions spéciales — choisis tes couleurs, on t'expédie sous 48h.</p>
-      <div class="hero-badges">
-        <span class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>
-          Livraison 48h
-        </span>
-        <span class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>
-          Pièces authentiques
-        </span>
-        <span class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-          Paiement à la commande
-        </span>
-      </div>
-    </div>
-  </section>
-
-  <main class="container" id="produits">
-    <div class="section-head">
-      <h2>Nos maillots</h2>
-      <div class="search-box">
-        <input type="search" id="search" placeholder="Rechercher un club, un joueur..." autocomplete="off">
-      </div>
-    </div>
-    <div id="productsGrid" class="grid"></div>
-    <div id="emptyState" class="empty" style="display:none">
-      <h3>Aucun maillot pour l'instant</h3>
-      <p>La boutique se remplit — repasse dans quelques instants.</p>
-    </div>
-    <div id="noResults" class="empty" style="display:none">
-      <h3>Rien ne correspond à ta recherche</h3>
-      <p>Essaie un autre club ou joueur.</p>
-    </div>
+  <main class="container">
+    <a href="/" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Retour à la boutique
+    </a>
+    <div id="productContainer"></div>
+    <div id="relatedContainer"></div>
   </main>
 
   <footer class="footer">
@@ -75,24 +43,21 @@
     <p>© <span id="year"></span> · <a href="/admin">Espace vendeur</a></p>
   </footer>
 
-  <!-- Cart modal (kept as modal — quick overview) -->
+  <!-- Cart / Checkout / Confirmation modals (shared with home page) -->
   <div class="modal-overlay" id="cartModal" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-head">
         <h3>Votre panier</h3>
         <button class="icon-btn" data-close aria-label="Fermer">×</button>
       </div>
-      <div class="modal-body">
-        <div id="cartBody"></div>
-      </div>
+      <div class="modal-body"><div id="cartBody"></div></div>
       <div class="modal-foot">
-        <button class="btn btn-secondary" data-close>Continuer mes achats</button>
+        <button class="btn btn-secondary" data-close>Continuer</button>
         <button class="btn btn-primary" id="goCheckout" disabled>Commander</button>
       </div>
     </div>
   </div>
 
-  <!-- Checkout modal -->
   <div class="modal-overlay" id="checkoutModal" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-head">
@@ -108,7 +73,6 @@
           <div class="field">
             <label for="cContact">Email ou téléphone</label>
             <input id="cContact" name="contact" required autocomplete="email">
-            <div class="field-hint">Pour qu'on vous contacte rapidement.</div>
           </div>
           <div class="field">
             <label for="cAddress">Adresse de livraison</label>
@@ -116,7 +80,7 @@
           </div>
           <div class="field">
             <label for="cNote">Message (optionnel)</label>
-            <textarea id="cNote" name="note" rows="2" placeholder="Instructions particulières..."></textarea>
+            <textarea id="cNote" name="note" rows="2"></textarea>
           </div>
           <div class="cart-total">
             <span>Total</span>
@@ -131,7 +95,6 @@
     </div>
   </div>
 
-  <!-- Confirmation modal -->
   <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-head">
@@ -139,17 +102,17 @@
         <button class="icon-btn" data-close aria-label="Fermer">×</button>
       </div>
       <div class="modal-body">
-        <p>Merci pour votre confiance. Nous avons bien reçu votre commande <strong id="confirmId"></strong> et vous recontactons rapidement pour la confirmation et le paiement.</p>
+        <p>Merci pour votre confiance. Nous avons bien reçu votre commande <strong id="confirmId"></strong>.</p>
         <div id="contactOptions"></div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-primary btn-block" data-close>Retour à la boutique</button>
+        <a href="/" class="btn btn-primary btn-block">Retour à la boutique</a>
       </div>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
-  <script src="/js/shop.js"></script>
+  <script src="/js/produit.js"></script>
 </body>
 </html>

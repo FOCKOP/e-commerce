@@ -39,6 +39,22 @@ if (!fs.existsSync(SETTINGS_FILE)) {
   });
 }
 
+function normalizeProduct(p) {
+  const images = Array.isArray(p.images) && p.images.length
+    ? p.images.filter(Boolean)
+    : (p.image ? [p.image] : []);
+  const { image, ...rest } = p;
+  return { ...rest, images };
+}
+
+function sanitizeImages(input) {
+  if (!Array.isArray(input)) return [];
+  return input
+    .filter(u => typeof u === 'string' && u.length > 0 && u.length < 500)
+    .filter(u => u.startsWith('/uploads/') || u.startsWith('http://') || u.startsWith('https://') || u.startsWith('data:image/'))
+    .slice(0, 8);
+}
+
 const sessions = new Set();
 
 function requireAuth(req, res, next) {
@@ -57,7 +73,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024, files: 8 },
   fileFilter: (_req, file, cb) => {
     const ok = /^image\/(png|jpe?g|webp|gif)$/.test(file.mimetype);
     cb(ok ? null : new Error('Format d\'image non supporté'), ok);
@@ -97,12 +113,20 @@ app.get('/api/session', (req, res) => {
 });
 
 app.get('/api/products', (_req, res) => {
-  res.json(readJson(PRODUCTS_FILE, []));
+  const list = readJson(PRODUCTS_FILE, []).map(normalizeProduct);
+  res.json(list);
+});
+
+app.get('/api/products/:id', (req, res) => {
+  const list = readJson(PRODUCTS_FILE, []).map(normalizeProduct);
+  const p = list.find(x => x.id === req.params.id);
+  if (!p) return res.status(404).json({ error: 'Introuvable' });
+  res.json(p);
 });
 
 app.post('/api/products', requireAuth, (req, res) => {
   const products = readJson(PRODUCTS_FILE, []);
-  const { name, team, price, description, image, sizes, stock } = req.body || {};
+  const { name, team, price, description, images, sizes, stock } = req.body || {};
   if (!name || !price) return res.status(400).json({ error: 'Nom et prix requis' });
   const product = {
     id: crypto.randomBytes(6).toString('hex'),
@@ -110,7 +134,7 @@ app.post('/api/products', requireAuth, (req, res) => {
     team: (team || '').trim(),
     price: Number(price),
     description: (description || '').trim(),
-    image: image || '',
+    images: sanitizeImages(images),
     sizes: Array.isArray(sizes) ? sizes : ['S', 'M', 'L', 'XL'],
     stock: Number.isFinite(Number(stock)) ? Number(stock) : 10,
     createdAt: Date.now()
@@ -124,19 +148,21 @@ app.put('/api/products/:id', requireAuth, (req, res) => {
   const products = readJson(PRODUCTS_FILE, []);
   const idx = products.findIndex(p => p.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: 'Introuvable' });
-  const { name, team, price, description, image, sizes, stock } = req.body || {};
-  products[idx] = {
-    ...products[idx],
+  const { name, team, price, description, images, sizes, stock } = req.body || {};
+  const normalized = normalizeProduct(products[idx]);
+  const updated = {
+    ...normalized,
     ...(name !== undefined ? { name: String(name).trim() } : {}),
     ...(team !== undefined ? { team: String(team).trim() } : {}),
     ...(price !== undefined ? { price: Number(price) } : {}),
     ...(description !== undefined ? { description: String(description).trim() } : {}),
-    ...(image !== undefined ? { image } : {}),
-    ...(sizes !== undefined ? { sizes: Array.isArray(sizes) ? sizes : products[idx].sizes } : {}),
+    ...(images !== undefined ? { images: sanitizeImages(images) } : {}),
+    ...(sizes !== undefined ? { sizes: Array.isArray(sizes) ? sizes : normalized.sizes } : {}),
     ...(stock !== undefined ? { stock: Number(stock) } : {})
   };
+  products[idx] = updated;
   writeJson(PRODUCTS_FILE, products);
-  res.json(products[idx]);
+  res.json(updated);
 });
 
 app.delete('/api/products/:id', requireAuth, (req, res) => {
@@ -146,9 +172,10 @@ app.delete('/api/products/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/upload', requireAuth, upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Aucune image' });
-  res.json({ url: '/uploads/' + req.file.filename });
+app.post('/api/upload', requireAuth, upload.array('images', 8), (req, res) => {
+  const files = req.files || [];
+  if (files.length === 0) return res.status(400).json({ error: 'Aucune image' });
+  res.json({ urls: files.map(f => '/uploads/' + f.filename) });
 });
 
 app.get('/api/settings', (_req, res) => {
