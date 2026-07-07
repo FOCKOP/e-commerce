@@ -61,8 +61,8 @@
         <h3>Finaliser la commande</h3>
         <button class="icon-btn" data-close aria-label="Fermer">×</button>
       </div>
-      <form id="checkoutForm">
-        <div class="modal-body">
+      <div class="modal-body">
+        <form id="checkoutForm">
           <div class="field">
             <label for="cName">Votre nom</label>
             <input id="cName" name="name" required autocomplete="name">
@@ -79,27 +79,36 @@
             <label for="cNote">Message (optionnel)</label>
             <textarea id="cNote" name="note" rows="2"></textarea>
           </div>
-          <div class="cart-total">
-            <span>Total</span>
-            <span id="checkoutTotal">0 €</span>
+        </form>
+        <div class="cart-total">
+          <span>Total</span>
+          <span id="checkoutTotal">0 €</span>
+        </div>
+        <div class="pay-section" id="paySection">
+          <div class="pay-label" id="payMethodLabel">Choisir un mode de paiement</div>
+          <button type="button" class="pay-btn stripe" id="payStripeBtn" style="display:none"></button>
+          <div id="paypal-button-container" style="display:none"></div>
+          <button type="button" class="pay-btn manual" id="payManualBtn"></button>
+          <div class="pay-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Paiement 100 % sécurisé
           </div>
         </div>
-        <div class="modal-foot">
-          <button type="button" class="btn btn-secondary" data-close>Retour</button>
-          <button type="submit" class="btn btn-primary">Valider la commande</button>
-        </div>
-      </form>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-secondary btn-block" data-close>Retour au panier</button>
+      </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-head">
-        <h3>Commande envoyée !</h3>
+        <h3 id="confirmTitle">Commande envoyée !</h3>
         <button class="icon-btn" data-close aria-label="Fermer">×</button>
       </div>
       <div class="modal-body">
-        <p>Merci pour votre confiance. Nous avons bien reçu votre commande <strong id="confirmId"></strong>.</p>
+        <p id="confirmIntro">Merci pour votre confiance. Nous avons bien reçu votre commande <strong id="confirmId"></strong>.</p>
         <div id="contactOptions"></div>
       </div>
       <div class="modal-foot">
@@ -110,6 +119,7 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="/js/checkout.js"></script>
   <script src="/js/produit.js"></script>
 </body>
 </html>

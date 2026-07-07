@@ -1241,6 +1241,154 @@ a:hover { text-decoration: underline; }
   text-decoration: none;
 }
 
+/* ---------- Payment methods ---------- */
+
+.pay-section {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.pay-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin: 8px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pay-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.pay-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  transition: background .2s, transform .1s, box-shadow .2s;
+  margin-bottom: 10px;
+}
+.pay-btn:active { transform: scale(.99); }
+.pay-btn:disabled { opacity: .5; cursor: not-allowed; }
+.pay-btn.stripe {
+  background: linear-gradient(135deg, #635bff 0%, #5851ea 100%);
+  color: white;
+  box-shadow: 0 6px 18px rgba(99, 91, 255, .28);
+}
+.pay-btn.stripe:hover { background: linear-gradient(135deg, #5851ea 0%, #4c46d1 100%); }
+.pay-btn.stripe .icons {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.pay-btn.manual {
+  background: var(--paper);
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+}
+.pay-btn.manual:hover { background: var(--blue-50); border-color: var(--blue-200); }
+#paypal-button-container { min-height: 45px; margin-bottom: 10px; }
+.pay-note {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.pay-note svg { width: 12px; height: 12px; }
+.pay-loader {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Payment status badges (admin) */
+.pay-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-left: 6px;
+}
+.pay-paye { background: #d1fae5; color: #065f46; }
+.pay-en_attente { background: #fef3c7; color: #92400e; }
+.pay-manuel { background: var(--paper); color: var(--muted); border: 1px solid var(--border); }
+
+/* Success / cancel pages */
+.result-page {
+  max-width: 560px;
+  margin: 40px auto;
+  padding: 40px 32px;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.result-icon {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+}
+.result-icon.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+.result-icon.cancel {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.result-icon.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.result-icon svg { width: 40px; height: 40px; }
+.result-page h1 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+}
+.result-page p {
+  color: var(--muted);
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+.result-order {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 20px 0;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--navy);
+}
+.result-order strong { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
 /* ---------- Mobile tweaks ---------- */
 
 @media (max-width: 640px) {

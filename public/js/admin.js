@@ -292,7 +292,10 @@
               #${o.id.slice(0, 6).toUpperCase()} · ${new Date(o.createdAt).toLocaleString('fr-FR')}
             </div>
           </div>
-          <span class="order-status status-${escapeHtml(o.status)}">${escapeHtml(o.status)}</span>
+          <div>
+            <span class="order-status status-${escapeHtml(o.status)}">${escapeHtml(o.status)}</span>
+            ${o.paymentStatus ? `<span class="pay-status pay-${escapeHtml(o.paymentStatus)}">${o.paymentMethod === 'stripe' ? 'CB' : (o.paymentMethod === 'paypal' ? 'PayPal' : 'À régler')} ${o.paymentStatus === 'paye' ? '✓' : (o.paymentStatus === 'en_attente' ? '⋯' : '')}</span>` : ''}
+          </div>
         </div>
         <ul class="order-items">
           ${o.items.map(i => `<li>${i.qty}× <strong>${escapeHtml(i.name)}</strong> (${escapeHtml(i.size)}) — ${eur(i.price * i.qty)}</li>`).join('')}

@@ -190,71 +190,20 @@
     openModal('checkoutModal');
   });
 
-  $('#checkoutForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const form = e.target;
-    const btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    btn.textContent = 'Envoi...';
-    const total = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const payload = {
-      customer: {
-        name: form.name.value.trim(),
-        contact: form.contact.value.trim(),
-        address: form.address.value.trim()
-      },
-      items: state.cart.map(i => ({
-        id: i.id, name: i.name, team: i.team,
-        size: i.size, price: i.price, qty: i.qty
-      })),
-      total,
-      note: form.note.value.trim()
+  // Expose cart/settings to the shared checkout module and wire the confirmation modal open
+  window.Onze = {
+    getCart: () => state.cart,
+    clearCart: () => { state.cart = []; saveCart(); },
+    getSettings: () => state.settings
+  };
+  const _origShowConf = window.OnzeCheckout?.showConfirmation;
+  if (_origShowConf) {
+    window.OnzeCheckout.showConfirmation = (id, payload, method) => {
+      _origShowConf(id, payload, method);
+      openModal('confirmModal');
     };
-    try {
-      const r = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!r.ok) throw new Error('Envoi impossible');
-      const data = await r.json();
-      state.cart = [];
-      saveCart();
-      form.reset();
-      closeModal($('#checkoutModal'));
-      showConfirmation(data.id, payload);
-    } catch (err) {
-      toast(err.message || 'Erreur lors de l\'envoi');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Valider la commande';
-    }
-  });
-
-  function showConfirmation(id, payload) {
-    $('#confirmId').textContent = '#' + id.slice(0, 6).toUpperCase();
-    const opts = $('#contactOptions');
-    const lines = [
-      `Bonjour, je viens de passer commande #${id.slice(0, 6).toUpperCase()} chez ${state.settings.shopName || 'Onze'}.`,
-      '',
-      ...payload.items.map(i => `• ${i.qty}× ${i.name} (${i.size}) — ${eur(i.price * i.qty)}`),
-      '',
-      `Total : ${eur(payload.total)}`,
-      `Nom : ${payload.customer.name}`,
-      `Contact : ${payload.customer.contact}`
-    ];
-    const msg = encodeURIComponent(lines.join('\n'));
-    const buttons = [];
-    if (state.settings.contactWhatsapp) {
-      const num = state.settings.contactWhatsapp.replace(/\D/g, '');
-      buttons.push(`<a class="btn btn-orange btn-block" style="margin-top:12px" href="https://wa.me/${num}?text=${msg}" target="_blank" rel="noopener">Contacter sur WhatsApp</a>`);
-    }
-    if (state.settings.contactEmail) {
-      buttons.push(`<a class="btn btn-secondary btn-block" style="margin-top:8px" href="mailto:${encodeURIComponent(state.settings.contactEmail)}?subject=Commande&body=${msg}">Envoyer par email</a>`);
-    }
-    opts.innerHTML = buttons.join('');
-    openModal('confirmModal');
   }
+  window.OnzeCheckout?.setup();
 
   $('#year').textContent = new Date().getFullYear();
 
