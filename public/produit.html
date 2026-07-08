@@ -86,12 +86,14 @@
         </div>
         <div class="pay-section" id="paySection">
           <div class="pay-label" id="payMethodLabel">Choisir un mode de paiement</div>
-          <button type="button" class="pay-btn stripe" id="payStripeBtn" style="display:none"></button>
-          <div id="paypal-button-container" style="display:none"></div>
+          <div id="paypal-buttons-wrap" style="display:none">
+            <div id="paypal-button-container"></div>
+            <div id="paypal-card-container"></div>
+          </div>
           <button type="button" class="pay-btn manual" id="payManualBtn"></button>
           <div class="pay-note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Paiement 100 % sécurisé
+            Paiement sécurisé par PayPal — CB acceptées sans compte
           </div>
         </div>
       </div>

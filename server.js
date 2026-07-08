@@ -4,7 +4,6 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const Stripe = require('stripe');
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
@@ -14,16 +13,13 @@ const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
 
-// Payment config
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
-const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY || '';
+// PayPal config
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || '';
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || '';
 const PAYPAL_ENV = (process.env.PAYPAL_ENV || 'sandbox').toLowerCase();
 const PAYPAL_BASE = PAYPAL_ENV === 'live'
   ? 'https://api-m.paypal.com'
   : 'https://api-m.sandbox.paypal.com';
-const stripe = STRIPE_SECRET_KEY ? Stripe(STRIPE_SECRET_KEY) : null;
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -65,13 +61,6 @@ function sanitizeImages(input) {
     .filter(u => typeof u === 'string' && u.length > 0 && u.length < 500)
     .filter(u => u.startsWith('/uploads/') || u.startsWith('http://') || u.startsWith('https://') || u.startsWith('data:image/'))
     .slice(0, 8);
-}
-
-function shopUrl(req) {
-  if (process.env.SHOP_URL) return process.env.SHOP_URL.replace(/\/$/, '');
-  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
-  const host = req.headers.host || `localhost:${PORT}`;
-  return `${proto}://${host}`;
 }
 
 // Server-side items validation — protects against price tampering
@@ -182,14 +171,10 @@ app.get('/api/session', (req, res) => {
   res.json({ authenticated: !!(token && sessions.has(token)) });
 });
 
-// ---------- Public config (for client to know which payment methods are on) ----------
+// ---------- Public config ----------
 
 app.get('/api/config', (_req, res) => {
   res.json({
-    stripe: {
-      enabled: !!stripe && !!STRIPE_PUBLISHABLE_KEY,
-      publishableKey: STRIPE_PUBLISHABLE_KEY
-    },
     paypal: {
       enabled: !!(PAYPAL_CLIENT_ID && PAYPAL_CLIENT_SECRET),
       clientId: PAYPAL_CLIENT_ID,
@@ -325,66 +310,6 @@ app.delete('/api/orders/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---------- Payment: Stripe Checkout ----------
-
-app.post('/api/pay/stripe/session', async (req, res) => {
-  if (!stripe) return res.status(400).json({ error: 'Paiement Stripe non configuré' });
-  const { customer, items: rawItems, note } = req.body || {};
-  if (!customer?.name || !customer?.contact || !Array.isArray(rawItems) || rawItems.length === 0) {
-    return res.status(400).json({ error: 'Commande invalide' });
-  }
-  try {
-    const { items, total } = validateItems(rawItems);
-    const order = makeOrder({
-      customer, items, total, note,
-      paymentMethod: 'stripe', paymentStatus: 'en_attente'
-    });
-    const base = shopUrl(req);
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      line_items: items.map(i => ({
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: `${i.name}${i.team ? ' — ' + i.team : ''} · Taille ${i.size}`.slice(0, 250)
-          },
-          unit_amount: Math.round(i.price * 100)
-        },
-        quantity: i.qty
-      })),
-      customer_email: customer.contact.includes('@') ? customer.contact : undefined,
-      success_url: `${base}/paiement-succes?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${base}/paiement-annule?order_id=${order.id}`,
-      metadata: { orderId: order.id, shopName: (readJson(SETTINGS_FILE, {}).shopName || 'Onze') }
-    });
-    res.json({ url: session.url, orderId: order.id });
-  } catch (e) {
-    console.error('Stripe session error:', e.message);
-    res.status(500).json({ error: 'Impossible de créer la session de paiement' });
-  }
-});
-
-app.get('/api/pay/stripe/verify', async (req, res) => {
-  if (!stripe) return res.status(400).json({ error: 'Non configuré' });
-  const { session_id } = req.query;
-  if (!session_id) return res.status(400).json({ error: 'session_id manquant' });
-  try {
-    const session = await stripe.checkout.sessions.retrieve(session_id);
-    const orderId = session.metadata?.orderId;
-    if (orderId && session.payment_status === 'paid') {
-      updateOrderPayment(orderId, { paymentStatus: 'paye' });
-    }
-    res.json({
-      orderId,
-      paymentStatus: session.payment_status,
-      amount: session.amount_total ? session.amount_total / 100 : null
-    });
-  } catch (e) {
-    console.error('Stripe verify error:', e.message);
-    res.status(500).json({ error: 'Vérification impossible' });
-  }
-});
-
 // ---------- Payment: PayPal ----------
 
 async function paypalToken() {
@@ -485,5 +410,5 @@ app.use((err, _req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`Onze en ligne — http://localhost:${PORT}`);
   console.log(`Admin : http://localhost:${PORT}/admin  (mot de passe: ${ADMIN_PASSWORD})`);
-  console.log(`Paiements : Stripe ${stripe ? 'ON' : 'OFF'} · PayPal ${PAYPAL_CLIENT_ID ? 'ON (' + PAYPAL_ENV + ')' : 'OFF'}`);
+  console.log(`Paiement : PayPal ${PAYPAL_CLIENT_ID ? 'ON (' + PAYPAL_ENV + ')' : 'OFF'}`);
 });

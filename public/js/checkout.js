@@ -1,5 +1,5 @@
 // Shared checkout logic used by shop.js and produit.js.
-// Expects a global object `window.Onze` to be created by the host page with:
+// Expects the host page to create `window.Onze` with:
 //   { getCart, clearCart, getSettings }
 
 (function () {
@@ -31,7 +31,7 @@
       const r = await fetch('/api/config');
       config = await r.json();
     } catch {
-      config = { stripe: { enabled: false }, paypal: { enabled: false } };
+      config = { paypal: { enabled: false } };
     }
     return config;
   }
@@ -70,32 +70,6 @@
     };
   }
 
-  async function payWithStripe() {
-    const payload = buildPayload();
-    if (!payload) return;
-    const btn = $('#payStripeBtn');
-    btn.disabled = true;
-    btn.textContent = 'Redirection...';
-    try {
-      const r = await fetch('/api/pay/stripe/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!r.ok) {
-        const e = await r.json().catch(() => ({}));
-        throw new Error(e.error || 'Erreur');
-      }
-      const { url } = await r.json();
-      // Cart will be cleared on the success page.
-      window.location.href = url;
-    } catch (e) {
-      toast(e.message);
-      btn.disabled = false;
-      btn.innerHTML = stripeBtnHtml();
-    }
-  }
-
   async function payManual() {
     const payload = buildPayload();
     if (!payload) return;
@@ -126,77 +100,94 @@
     if (paypalLoaded || !config.paypal.enabled) return;
     try {
       const clientId = encodeURIComponent(config.paypal.clientId);
-      await loadScript(`https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture`);
+      // enable-funding=card ensures the "Debit or Credit Card" button is available
+      await loadScript(`https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture&enable-funding=card`);
     } catch (e) {
       console.error(e);
-      $('#paypal-button-container').innerHTML = '<div class="pay-note" style="color:var(--danger)">PayPal indisponible</div>';
+      const wrap = $('#paypal-buttons-wrap');
+      if (wrap) wrap.innerHTML = '<div class="pay-note" style="color:var(--danger)">PayPal indisponible</div>';
       return;
     }
     paypalLoaded = true;
     let pendingOrderId = null;
 
+    async function createOrder() {
+      const payload = buildPayload();
+      if (!payload) throw new Error('Formulaire incomplet');
+      const r = await fetch('/api/pay/paypal/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        throw new Error(e.error || 'PayPal a refusé');
+      }
+      const { paypalOrderId, orderId } = await r.json();
+      pendingOrderId = orderId;
+      return paypalOrderId;
+    }
+
+    async function onApprove(data) {
+      const r = await fetch('/api/pay/paypal/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paypalOrderId: data.orderID, orderId: pendingOrderId })
+      });
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        toast(e.error || 'Paiement échoué');
+        return;
+      }
+      const cart = window.Onze.getCart();
+      const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+      const items = cart.map(i => ({
+        name: i.name, size: i.size, price: i.price, qty: i.qty, team: i.team
+      }));
+      window.Onze.clearCart();
+      $('#checkoutForm').reset();
+      closeModal($('#checkoutModal'));
+      showConfirmation(pendingOrderId, {
+        items,
+        total,
+        customer: {
+          name: $('#cName').value.trim(),
+          contact: $('#cContact').value.trim()
+        }
+      }, 'paypal');
+    }
+
+    function onError(err) {
+      console.error(err);
+      toast('Erreur PayPal');
+    }
+
+    function onCancel() {
+      toast('Paiement annulé');
+    }
+
+    // PayPal button (yellow — login flow)
     window.paypal.Buttons({
       style: { layout: 'horizontal', color: 'gold', shape: 'pill', label: 'paypal', tagline: false, height: 45 },
-      createOrder: async () => {
-        const payload = buildPayload();
-        if (!payload) throw new Error('Formulaire incomplet');
-        const r = await fetch('/api/pay/paypal/order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!r.ok) {
-          const e = await r.json().catch(() => ({}));
-          throw new Error(e.error || 'PayPal a refusé');
-        }
-        const { paypalOrderId, orderId } = await r.json();
-        pendingOrderId = orderId;
-        return paypalOrderId;
-      },
-      onApprove: async (data) => {
-        const r = await fetch('/api/pay/paypal/capture', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paypalOrderId: data.orderID, orderId: pendingOrderId })
-        });
-        if (!r.ok) {
-          const e = await r.json().catch(() => ({}));
-          toast(e.error || 'Paiement PayPal échoué');
-          return;
-        }
-        const cart = window.Onze.getCart();
-        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-        const items = cart.map(i => ({
-          name: i.name, size: i.size, price: i.price, qty: i.qty, team: i.team
-        }));
-        window.Onze.clearCart();
-        $('#checkoutForm').reset();
-        closeModal($('#checkoutModal'));
-        showConfirmation(pendingOrderId, {
-          items,
-          total,
-          customer: {
-            name: $('#cName').value.trim(),
-            contact: $('#cContact').value.trim()
-          }
-        }, 'paypal');
-      },
-      onError: (err) => {
-        console.error(err);
-        toast('Erreur PayPal');
-      },
-      onCancel: () => {
-        toast('Paiement PayPal annulé');
-      }
+      createOrder,
+      onApprove,
+      onError,
+      onCancel
     }).render('#paypal-button-container');
+
+    // Card button (black — guest debit/credit card checkout via PayPal)
+    if (window.paypal.FUNDING && window.paypal.FUNDING.CARD) {
+      window.paypal.Buttons({
+        fundingSource: window.paypal.FUNDING.CARD,
+        style: { layout: 'horizontal', color: 'black', shape: 'pill', height: 45 },
+        createOrder,
+        onApprove,
+        onError,
+        onCancel
+      }).render('#paypal-card-container');
+    }
   }
 
-  function stripeBtnHtml() {
-    return `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      Payer par carte / Apple Pay
-    `;
-  }
   function manualBtnHtml() {
     return `
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -209,34 +200,27 @@
     const paySection = $('#paySection');
     if (!paySection) return;
 
-    const hasOnline = cfg.stripe.enabled || cfg.paypal.enabled;
-
-    if (cfg.stripe.enabled) {
-      $('#payStripeBtn').style.display = 'inline-flex';
-      $('#payStripeBtn').innerHTML = stripeBtnHtml();
-      $('#payStripeBtn').addEventListener('click', payWithStripe);
-    }
     if (cfg.paypal.enabled) {
-      $('#paypal-button-container').style.display = '';
+      $('#paypal-buttons-wrap').style.display = '';
       initPayPal();
     }
     $('#payManualBtn').innerHTML = manualBtnHtml();
     $('#payManualBtn').addEventListener('click', payManual);
 
-    if (!hasOnline) {
+    if (!cfg.paypal.enabled) {
       $('#payMethodLabel').style.display = 'none';
       $('#payManualBtn').innerHTML = `
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
         Valider la commande
       `;
       $('#payManualBtn').classList.remove('manual');
-      $('#payManualBtn').classList.add('stripe');
+      $('#payManualBtn').classList.add('primary-solid');
     }
   }
 
   function showConfirmation(id, payload, method) {
     $('#confirmId').textContent = '#' + id.slice(0, 6).toUpperCase();
-    const isPaid = method === 'stripe' || method === 'paypal';
+    const isPaid = method === 'paypal';
     const title = $('#confirmTitle');
     const intro = $('#confirmIntro');
     if (title) title.textContent = isPaid ? 'Paiement confirmé !' : 'Commande envoyée !';
@@ -271,7 +255,6 @@
     opts.innerHTML = buttons.join('');
   }
 
-  // Expose
   window.OnzeCheckout = {
     setup: setupCheckout,
     showConfirmation

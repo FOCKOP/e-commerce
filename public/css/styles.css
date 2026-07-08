@@ -1281,24 +1281,20 @@ a:hover { text-decoration: underline; }
 }
 .pay-btn:active { transform: scale(.99); }
 .pay-btn:disabled { opacity: .5; cursor: not-allowed; }
-.pay-btn.stripe {
-  background: linear-gradient(135deg, #635bff 0%, #5851ea 100%);
-  color: white;
-  box-shadow: 0 6px 18px rgba(99, 91, 255, .28);
+.pay-btn.primary-solid {
+  background: var(--blue-600);
+  color: var(--white);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, .3);
 }
-.pay-btn.stripe:hover { background: linear-gradient(135deg, #5851ea 0%, #4c46d1 100%); }
-.pay-btn.stripe .icons {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-}
+.pay-btn.primary-solid:hover { background: var(--blue-700); }
 .pay-btn.manual {
   background: var(--paper);
   color: var(--navy);
   border: 1.5px solid var(--border);
 }
 .pay-btn.manual:hover { background: var(--blue-50); border-color: var(--blue-200); }
-#paypal-button-container { min-height: 45px; margin-bottom: 10px; }
+#paypal-buttons-wrap { margin-bottom: 10px; }
+#paypal-button-container, #paypal-card-container { min-height: 45px; margin-bottom: 8px; }
 .pay-note {
   font-size: 12px;
   color: var(--muted);

@@ -10,7 +10,6 @@
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
-    "multer": "^2.0.1",
-    "stripe": "^17.0.0"
+    "multer": "^2.0.1"
   }
 }
